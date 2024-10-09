@@ -28,10 +28,12 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
     if (SDTUtils::HasJumpFlag(segmentStart))
     {
         // Update jump along path / nav link proxy
+
     }
     else
     {
-        // Update navigation along path (move along)
+        // Update normal movement
+		Super::FollowPathSegment(DeltaTime);
     }
 }
 
@@ -54,6 +56,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
     else
     {
         // Handle normal segments
+
     }
 }
 

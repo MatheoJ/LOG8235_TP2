@@ -41,7 +41,11 @@ public:
 
 private:
     virtual void GoToBestTarget(float deltaTime) override;
+
+    void ComputeAndFollowPathToTarget(const FVector& targetLocation);   
+
     virtual void ShowNavigationPath() override;
 
     PedestrianState m_PedestrianState{ PedestrianState::SPAWNED };
+
 };

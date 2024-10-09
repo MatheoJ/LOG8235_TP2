@@ -9,6 +9,9 @@
 #include "SDTBridge.h"
 #include "SDTBoatOperator.h"
 
+#include "NavigationSystem.h"
+#include <NavigationPath.h>
+
 ASoftDesignTrainingPlayerController::ASoftDesignTrainingPlayerController()
 {
     // Make a path following component
@@ -85,6 +88,63 @@ void ASoftDesignTrainingPlayerController::MoveCharacter()
     // TODO : find the position of the mouse in the world 
     // And move the agent to this position IF possible
     // Validate you can move through m_CanMoveCharacter
+
+    if (!m_CanMoveCharacter)
+    {
+		return;
+	}
+
+    FVector2d mousePosition;
+    GetMousePosition(mousePosition.X, mousePosition.Y);
+
+    FHitResult hitResult;
+    bool hit = GetHitResultAtScreenPosition(mousePosition, ECollisionChannel::ECC_WorldStatic, false, hitResult);
+
+    //Log on screen the position of the mouse
+    FString mousePositionString = "Mouse Position : " + mousePosition.ToString();
+    GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, mousePositionString);
+    //Draw a debug sphere at the position of the mouse in the world
+    DrawDebugSphere(GetWorld(), hitResult.ImpactPoint, 25.f, 12, FColor::Blue, false, 2.5f);
+
+    if (hit)
+    {
+		FVector destination = hitResult.ImpactPoint;
+		APawn* pawn = GetPawn();
+        if (pawn)
+        {
+            //UAIBlueprintHelperLibrary::SimpleMoveToLocation(this, destination);
+
+            UNavigationPath* path = UNavigationSystemV1::FindPathToLocationSynchronously(this, pawn->GetActorLocation(), destination);
+            if (!path || !path->GetPath().IsValid() || path->GetPath()->IsPartial() || path->GetPath()->GetPathPoints().Num() == 0)
+            {
+                GEngine->AddOnScreenDebugMessage(1, 1.f, FColor::Red, TEXT("INVALID DESTINATION USED"));
+                return;
+            }
+
+            // Get the FNavPathSharedPtr
+            FNavPathSharedPtr navPath = path->GetPath();
+
+            
+            m_PathFollowingComponent->RequestMove(destination, navPath);
+
+            // Draw the path
+            if (navPath.IsValid())
+            {
+				TArray<FNavPathPoint> pathPoints = navPath->GetPathPoints();
+                for (int i = 0; i < pathPoints.Num() - 1; i++)
+                {
+					DrawDebugLine(GetWorld(), pathPoints[i].Location, pathPoints[i + 1].Location, FColor::Green, false, 2.5f);
+				}
+                //Log on screen the position of the mouse
+                FString message = "Path found";
+                GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, message);
+            }
+			
+		}
+	}
+
+
+
 }
 
 void ASoftDesignTrainingPlayerController::Activate()
@@ -97,6 +157,8 @@ void ASoftDesignTrainingPlayerController::Activate()
 
     m_CanMoveCharacter = false;
     // TODO : Mouvement of the agent should be stopped !!
+
+    m_PathFollowingComponent->AbortMove(*this, FPathFollowingResultFlags::MovementStop);
 
     // Make an overlap to find what is near us to activate it
     TArray<FOverlapResult> results;
