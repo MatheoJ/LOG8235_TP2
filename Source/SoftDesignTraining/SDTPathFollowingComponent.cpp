@@ -4,6 +4,7 @@
 #include "SoftDesignTraining.h"
 #include "SDTUtils.h"
 #include "SDTAIController.h"
+#include "SoftDesignTrainingPlayerController.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NavigationSystem.h"
 #include "NavLinkCustomInterface.h"
@@ -49,14 +50,57 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
 
     const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
 
+    UCharacterMovementComponent* characterMovementComponent;
+
+    ASDTAIController* aIController = Cast<ASDTAIController>(GetOwner());   
+    
+    if (aIController != nullptr)
+    {
+        characterMovementComponent = aIController->GetCharacter()->GetCharacterMovement();
+	}
+    else
+    {
+        ASoftDesignTrainingPlayerController *playerController = Cast<ASoftDesignTrainingPlayerController>(GetOwner());
+        characterMovementComponent = playerController->GetCharacter()->GetCharacterMovement();
+	}
+
+    
+
     if (SDTUtils::HasJumpFlag(segmentStart) && FNavMeshNodeFlags(segmentStart.Flags).IsNavLink())
     {
-        // Handle starting jump
+        isJumping = true;
+
+        characterMovementComponent->SetMovementMode(EMovementMode::MOVE_Falling);
+
+        //Calculate velocity
+        FVector velocity = CalculateVelocity(segmentStart.Location, points[MoveSegmentStartIndex + 1].Location, 2.0f);
+        characterMovementComponent->Launch(FVector(velocity.X, velocity.Y, FMath::Abs(velocity.Z)));
+
     }
     else
     {
-        // Handle normal segments
-
+        isJumping= false;
+        characterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
     }
+}
+
+FVector USDTPathFollowingComponent::CalculateVelocity(const FVector& currentPos, const FVector& nextPos, float jumpduration)
+{
+    FVector velocity = FVector::ZeroVector;
+
+    double x = nextPos.X - currentPos.X;
+    double y = nextPos.Y - currentPos.Y;
+
+    x = x / jumpduration;
+    y = y / jumpduration;
+
+    double z = nextPos.Z - currentPos.Z + (jumpduration * jumpduration * -0.5 * 980);
+    z = z / jumpduration;
+
+    velocity.X = x;
+    velocity.Y = y;
+    velocity.Z = z;
+
+    return velocity;
 }
 

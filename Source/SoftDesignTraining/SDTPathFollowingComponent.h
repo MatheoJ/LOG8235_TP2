@@ -23,4 +23,7 @@ public:
 
     UPROPERTY(BlueprintReadOnly)
     bool isJumping{ false };
+
+private:
+    FVector3d CalculateVelocity(const FVector& currentPos, const FVector& nextPos, float jumpduration);
 };
