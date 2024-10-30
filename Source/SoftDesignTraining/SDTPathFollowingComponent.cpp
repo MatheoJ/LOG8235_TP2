@@ -29,7 +29,7 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
     if (SDTUtils::HasJumpFlag(segmentStart))
     {
         // Update jump along path / nav link proxy
-
+        jumProgress += DeltaTime/jumpDuration;
     }
     else
     {
@@ -63,9 +63,7 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
         ASoftDesignTrainingPlayerController *playerController = Cast<ASoftDesignTrainingPlayerController>(GetOwner());
         characterMovementComponent = playerController->GetCharacter()->GetCharacterMovement();
 	}
-
-    
-
+     
     if (SDTUtils::HasJumpFlag(segmentStart) && FNavMeshNodeFlags(segmentStart.Flags).IsNavLink())
     {
         isJumping = true;
@@ -73,9 +71,9 @@ void USDTPathFollowingComponent::SetMoveSegment(int32 segmentStartIndex)
         characterMovementComponent->SetMovementMode(EMovementMode::MOVE_Falling);
 
         //Calculate velocity
-        FVector velocity = CalculateVelocity(segmentStart.Location, points[MoveSegmentStartIndex + 1].Location, 2.0f);
+        FVector velocity = CalculateVelocity(segmentStart.Location, points[MoveSegmentStartIndex + 1].Location, jumpDuration);
         characterMovementComponent->Launch(FVector(velocity.X, velocity.Y, FMath::Abs(velocity.Z)));
-
+        jumProgress = 0.f;
     }
     else
     {
