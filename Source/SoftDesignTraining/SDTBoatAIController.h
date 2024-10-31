@@ -20,14 +20,14 @@ enum class BoatState
 };
 
 /**
- * 
+ *
  */
 UCLASS()
 class SOFTDESIGNTRAINING_API ASDTBoatAIController : public ASDTBaseAIController
 {
-	GENERATED_BODY()
+    GENERATED_BODY()
 public:
-	virtual void Tick(float deltaTime) override;
+    virtual void Tick(float deltaTime) override;
 
     void NotifyUnloadComplete();
 
@@ -35,10 +35,13 @@ public:
     void AIStateInterrupted();
 
     BoatState GetBoatState();
+    void ComputeAndFollowPathToTarget(const FVector& targetLocation);
 
 private:
     virtual void GoToBestTarget(float deltaTime) override;
     virtual void ShowNavigationPath() override;
+    FVector CurrentTargetLocation = FVector::ZeroVector;
+    bool reserved = false;
 
-    BoatState m_BoatState{BoatState::SPAWNED};
+    BoatState m_BoatState{ BoatState::SPAWNED };
 };
