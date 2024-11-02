@@ -35,7 +35,23 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
     {
         // Update normal movement
 		Super::FollowPathSegment(DeltaTime);
-    }    
+    }
+
+    // Récupère la vitesse actuelle 
+    ASDTAIController* aIController = Cast<ASDTAIController>(GetOwner());
+    UCharacterMovementComponent* characterMovementComponent;
+    if (aIController != nullptr)
+    {
+        characterMovementComponent = aIController->GetCharacter()->GetCharacterMovement();
+    }
+    else
+    {
+        ASoftDesignTrainingPlayerController* playerController = Cast<ASoftDesignTrainingPlayerController>(GetOwner());
+        characterMovementComponent = playerController->GetCharacter()->GetCharacterMovement();
+        currentSpeed = 100 * (characterMovementComponent->Velocity.Size() / characterMovementComponent->GetMaxSpeed());
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Value: %f"), currentSpeed));
+    }
+    
 }
 
 /**
