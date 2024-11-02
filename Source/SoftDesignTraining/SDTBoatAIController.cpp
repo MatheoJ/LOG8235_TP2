@@ -15,7 +15,7 @@ void ASDTBoatAIController::Tick(float deltaTime)
 {
 	Super::Tick(deltaTime);
 
-	this->GoToBestTarget(deltaTime);
+	//this->GoToBestTarget(deltaTime);
 }
 
 void ASDTBoatAIController::ComputeAndFollowPathToTarget(const FVector& targetLocation)
@@ -80,30 +80,41 @@ void ASDTBoatAIController::GoToBestTarget(float deltaTime)
 		{
 			m_BoatState = BoatState::GO_TO_OPERATOR;
 		}
-		else
-			m_BoatState = BoatState::WAIT_AT_START_BRIDGE;
-
-
+	
 
 		break;
 	}
 	case BoatState::GO_TO_OPERATOR:
 	{
-
-
+		FString tag("Bridge_0");
+		AActor* actorBridge = FindActorWithTag(tag, false);
+		ASDTBridge* bridge = Cast<ASDTBridge>(actorBridge);
 		TArray<AActor*> foundActors;
 		UGameplayStatics::GetAllActorsOfClass(this, ASDTBoatOperator::StaticClass(), foundActors);
 
 
 		for (AActor* actor : foundActors)
 		{
+			
 			ASDTBoatOperator* boatOperator = Cast<ASDTBoatOperator>(actor);
 			//
 			// boatOperator->Deactivate();
 			//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Cyan, FString::Printf(TEXT("Nombre d'acteurs trouvés : %s"), *(boatOperator->GetDropLocation()).ToString()));
 
 
-			if (boatOperator->IsAvailable() && !this->reserved)
+			/*if (bridge && bridge->GetState() != EBridgeState::BRIDGE_UP) {
+				GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, TEXT("don t go"));
+				if (boatOperator) {
+					boatOperator->ClearReservation();
+				}
+				m_BoatState = BoatState::WAIT_AT_START_BRIDGE;
+				m_ReachedTarget = true;
+				this->reserved = false;
+				break;
+			}*/
+
+
+			if (boatOperator->IsAvailable() && !this->reserved && bridge && bridge->GetState() == EBridgeState::BRIDGE_UP)
 			{
 
 
@@ -116,7 +127,7 @@ void ASDTBoatAIController::GoToBestTarget(float deltaTime)
 				this->reserved = true;
 
 
-
+				
 
 
 
@@ -131,9 +142,10 @@ void ASDTBoatAIController::GoToBestTarget(float deltaTime)
 				break;
 
 			}
-
+			
 
 		}
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Yellow, TEXT("ALLLLLLLLLLLLL REEEEEESSSSSSSSSERVED"));
 		//m_BoatState = BoatState::WAIT_AT_START_BRIDGE;
 
 		/*if (!operatorFound && allOperatorsReserved)

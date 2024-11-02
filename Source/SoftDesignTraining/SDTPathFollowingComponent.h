@@ -26,4 +26,5 @@ public:
 
 private:
     FVector3d CalculateVelocity(const FVector& currentPos, const FVector& nextPos, float jumpduration);
+    float jumpDuration{ 2.f };
 };
