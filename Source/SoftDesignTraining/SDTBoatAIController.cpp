@@ -1,4 +1,5 @@
 // Fill out your copyright notice in the Description page of Project Settings.
+// Note: Activer enabledreawing dans recastNavmesh-boat sur unreal pour activer le second Navmesh
 
 
 #include "SDTBoatAIController.h"
