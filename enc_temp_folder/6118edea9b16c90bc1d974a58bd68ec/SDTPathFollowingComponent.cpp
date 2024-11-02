@@ -11,9 +11,6 @@
 
 #include "DrawDebugHelpers.h"
 
-#include <Kismet/KismetMathLibrary.h>
-
-
 USDTPathFollowingComponent::USDTPathFollowingComponent(const FObjectInitializer& ObjectInitializer)
 {
 
@@ -29,36 +26,32 @@ void USDTPathFollowingComponent::FollowPathSegment(float DeltaTime)
     const FNavPathPoint& segmentStart = points[MoveSegmentStartIndex];
     const FNavPathPoint& segmentEnd = points[MoveSegmentEndIndex];
 
-
-    ACharacter* characterEntry;
-
-    ASDTAIController* aIController = Cast<ASDTAIController>(GetOwner());
-    if (aIController != nullptr)
-    {
-        characterEntry = aIController->GetCharacter();
-	}
-    else
-    {
-		ASoftDesignTrainingPlayerController *playerController = Cast<ASoftDesignTrainingPlayerController>(GetOwner());
-		characterEntry = playerController-> GetCharacter();
-    }
-
-
     if (SDTUtils::HasJumpFlag(segmentStart))
     {
         // Update jump along path / nav link proxy
         jumProgress += DeltaTime/jumpDuration;
-
-        FRotator targetRotation = UKismetMathLibrary::FindLookAtRotation(segmentStart.Location, points[MoveSegmentStartIndex + 1].Location);
-        FRotator currentRotation = characterEntry->GetActorRotation();
-        characterEntry->SetActorRotation(FMath::Lerp(currentRotation, targetRotation, 0.1f));
-
     }
     else
     {
         // Update normal movement
 		Super::FollowPathSegment(DeltaTime);
-    }    
+    }
+
+    // Récupère la vitesse actuelle 
+    ASDTAIController* aIController = Cast<ASDTAIController>(GetOwner());
+    UCharacterMovementComponent* characterMovementComponent;
+    if (aIController != nullptr)
+    {
+        characterMovementComponent = aIController->GetCharacter()->GetCharacterMovement();
+    }
+    else
+    {
+        ASoftDesignTrainingPlayerController* playerController = Cast<ASoftDesignTrainingPlayerController>(GetOwner());
+        characterMovementComponent = playerController->GetCharacter()->GetCharacterMovement();
+        currentSpeed = 100 * (characterMovementComponent->Velocity.Size() / characterMovementComponent->GetMaxSpeed());
+        GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Green, FString::Printf(TEXT("Value: %f"), currentSpeed));
+    }
+    
 }
 
 /**
