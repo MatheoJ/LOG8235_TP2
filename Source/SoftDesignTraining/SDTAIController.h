@@ -46,6 +46,9 @@ private:
 
     virtual void ShowNavigationPath() override;
 
+	virtual bool IsPathStillValid() override;
+	virtual void AbortPathFollowing() override;
+
     PedestrianState m_PedestrianState{ PedestrianState::SPAWNED };
 
 };

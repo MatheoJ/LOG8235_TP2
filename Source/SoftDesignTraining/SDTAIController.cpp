@@ -189,3 +189,35 @@ void ASDTAIController::ComputeAndFollowPathToTarget(const FVector& targetLocatio
     pathFollowComp->RequestMove(targetLocation, navPath);
 
 }
+
+bool ASDTAIController::IsPathStillValid()
+{
+	UPathFollowingComponent* path = GetPathFollowingComponent();
+	if (path == nullptr)
+	{
+		return false;
+	}
+
+	FNavPathSharedPtr navPath = path->GetPath();
+
+	// We don't want the AI to take the navlink.
+	if (navPath.IsValid() && !navPath->IsPartial() && navPath->GetPathPoints().Num() > 0 && !navPath->ContainsAnyCustomLink())
+	{
+		return true;
+	}
+
+	return false;
+}
+
+void ASDTAIController::AbortPathFollowing()
+{
+	UPathFollowingComponent* path = GetPathFollowingComponent();
+	if (path == nullptr)
+	{
+		return;
+	}
+
+	path->AbortMove(*this, FPathFollowingResultFlags::InvalidPath);
+	// Reset the AI state. The AI will go back in front of the bridge.
+	m_PedestrianState = PedestrianState::SPAWNED;
+}

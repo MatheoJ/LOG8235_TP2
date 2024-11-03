@@ -22,7 +22,12 @@ void ASDTBaseAIController::Tick(float deltaTime)
     }
     else
     {
-        ShowNavigationPath();
+        if (IsPathStillValid()) {
+            ShowNavigationPath();
+        }
+        else {
+			AbortPathFollowing();
+        }
     }
 }
 

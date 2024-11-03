@@ -31,4 +31,7 @@ private:
     virtual void GoToBestTarget(float deltaTime) {};
     virtual void ChooseBehavior(float deltaTime) {};
     virtual void ShowNavigationPath() {};
+
+	virtual bool IsPathStillValid() { return false; };
+	virtual void AbortPathFollowing() {};
 };
